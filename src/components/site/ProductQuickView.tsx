@@ -171,14 +171,14 @@ export function ProductQuickView({
                 {SIZE_OPTIONS.map(({ label, dims }, i) => (
                   <div
                     key={label}
-                    className={`flex flex-1 flex-col items-center justify-center py-5 text-center ${
+                    className={`flex flex-1 flex-col items-center justify-center gap-2 py-5 text-center ${
                       i !== SIZE_OPTIONS.length - 1 ? "border-r border-border" : ""
                     }`}
                   >
-                    <span className="rounded-full bg-terracotta px-4 py-1 text-xs font-semibold uppercase tracking-wider text-primary-foreground">
+                    <span className="rounded-full bg-primary px-5 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary-foreground">
                       {label}
                     </span>
-                    <span className="mt-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       Size:
                     </span>
                     <span className="text-sm font-medium text-foreground">
