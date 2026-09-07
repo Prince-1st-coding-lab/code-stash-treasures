@@ -363,7 +363,7 @@ function GalleryField({
     setUploading(false);
     setProgress(0);
     if (urls.length) {
-      onChange([...value, ...urls]);
+      onChange([...urls, ...value]);
       toast.success(`${urls.length} image(s) uploaded — remember to save`);
     }
   };

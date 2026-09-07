@@ -92,7 +92,7 @@ function ShopPage() {
         <div className="rule-gold mt-5 max-w-xs" />
         <p className="mt-5 max-w-xl text-muted-foreground">
           Pots, vases, flowers, stands and gift articles for your space or your event. You order, we
-          deliver anywhere in Rwanda.
+          deliver.
         </p>
 
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
