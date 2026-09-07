@@ -64,7 +64,7 @@ export function ProductQuickView({
 
   if (!item) return null;
 
-  const isPots = item.category?.toLowerCase().trim() === "pots";
+  const isPots = !!item.category && /^pots\b/i.test(item.category.trim());
 
   const specs = [
     { label: "Size", value: item.size },
