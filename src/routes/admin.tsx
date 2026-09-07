@@ -691,7 +691,9 @@ function ProductsPanel() {
     const rows: Array<Record<string, unknown>> = [];
     let i = 0;
     for (const file of files) {
-      const url = await uploadImage(file);
+      const url = await uploadImage(file, (pct) =>
+        setUploadProgress(Math.round(((i + pct / 100) / files.length) * 100)),
+      );
       if (!url) continue;
       i += 1;
       rows.push({
@@ -774,7 +776,7 @@ function ProductsPanel() {
 
             <div className="flex flex-wrap gap-3">
               <label className={`${btn} cursor-pointer ${uploadingFor === c.id ? "opacity-60" : ""}`}>
-                {uploadingFor === c.id ? "Uploading…" : `Add photos to ${c.name}`}
+                {uploadingFor === c.id ? `Uploading… ${uploadProgress}%` : `Add photos to ${c.name}`}
                 <input
                   type="file"
                   accept="image/*"
