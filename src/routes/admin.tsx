@@ -345,15 +345,23 @@ function GalleryField({
   onChange: (v: string[]) => void;
 }) {
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [fileLabel, setFileLabel] = useState("");
 
   const addFiles = async (files: File[]) => {
     setUploading(true);
     const urls: string[] = [];
+    let done = 0;
     for (const file of files) {
-      const url = await uploadImage(file);
+      setFileLabel(`Uploading photo ${done + 1} of ${files.length}`);
+      const url = await uploadImage(file, (pct) =>
+        setProgress(Math.round(((done + pct / 100) / files.length) * 100)),
+      );
       if (url) urls.push(url);
+      done += 1;
     }
     setUploading(false);
+    setProgress(0);
     if (urls.length) {
       onChange([...value, ...urls]);
       toast.success(`${urls.length} image(s) uploaded — remember to save`);
