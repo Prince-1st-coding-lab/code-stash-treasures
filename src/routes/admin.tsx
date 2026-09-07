@@ -503,6 +503,7 @@ function ImageField({
                 }}
               />
             </label>
+            {uploading ? <UploadBar progress={progress} /> : null}
           </div>
           <details className="mt-2">
             <summary className="cursor-pointer text-xs text-muted-foreground">
@@ -626,6 +627,7 @@ function ProductsPanel() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [openIds, setOpenIds] = useState<string[]>([]);
   const [uploadingFor, setUploadingFor] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   useEffect(() => {
     if (data) setItems(data);
