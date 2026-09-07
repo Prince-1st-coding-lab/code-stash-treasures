@@ -266,20 +266,60 @@ function SettingsPanel({ tab }: { tab: "hero" | "contact" }) {
   );
 }
 
-async function uploadImage(file: File): Promise<string | null> {
+async function uploadImage(file: File, onProgress?: (pct: number) => void): Promise<string | null> {
   const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
   const path = `uploads/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const { error } = await supabase.storage
-    .from("site-images")
-    .upload(path, file, {
-      cacheControl: "31536000",
-      ...(file.type ? { contentType: file.type } : {}),
-    });
+  const { data: sessionData } = await supabase.auth.getSession();
+  const baseUrl: string = import.meta.env["VITE_SUPABASE_URL"];
+  const publishableKey: string = import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"];
+
+  const error = await new Promise<Error | null>((resolve) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${baseUrl}/storage/v1/object/site-images/${path}`);
+    xhr.setRequestHeader("apikey", publishableKey);
+    xhr.setRequestHeader("Authorization", `Bearer ${sessionData.session?.access_token ?? publishableKey}`);
+    xhr.setRequestHeader("cache-control", "31536000");
+    xhr.setRequestHeader("x-upsert", "false");
+    if (file.type) xhr.setRequestHeader("Content-Type", file.type);
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress?.(Math.round((e.loaded / e.total) * 100));
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) resolve(null);
+      else {
+        try {
+          resolve(new Error((JSON.parse(xhr.responseText) as { message?: string }).message || "Upload failed"));
+        } catch {
+          resolve(new Error("Upload failed"));
+        }
+      }
+    };
+    xhr.onerror = () => resolve(new Error("Upload failed"));
+    xhr.send(file);
+  });
   if (error) {
     toast.error(error.message);
     return null;
   }
+  onProgress?.(100);
   return supabase.storage.from("site-images").getPublicUrl(path).data.publicUrl;
+}
+
+function UploadBar({ progress, label }: { progress: number; label?: string }) {
+  return (
+    <div className="w-full max-w-xs">
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <span>{label ?? "Uploading…"}</span>
+        <span>{progress}%</span>
+      </div>
+      <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-muted">
+        <div
+          className="h-full rounded-full bg-primary transition-all duration-200"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+    </div>
+  );
 }
 
 const PROXY_PREFIX = "/api/public/site-image/";
@@ -305,15 +345,23 @@ function GalleryField({
   onChange: (v: string[]) => void;
 }) {
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [fileLabel, setFileLabel] = useState("");
 
   const addFiles = async (files: File[]) => {
     setUploading(true);
     const urls: string[] = [];
+    let done = 0;
     for (const file of files) {
-      const url = await uploadImage(file);
+      setFileLabel(`Uploading photo ${done + 1} of ${files.length}`);
+      const url = await uploadImage(file, (pct) =>
+        setProgress(Math.round(((done + pct / 100) / files.length) * 100)),
+      );
       if (url) urls.push(url);
+      done += 1;
     }
     setUploading(false);
+    setProgress(0);
     if (urls.length) {
       onChange([...value, ...urls]);
       toast.success(`${urls.length} image(s) uploaded — remember to save`);
@@ -350,7 +398,7 @@ function GalleryField({
       ) : null}
       <div className="mt-2 flex flex-wrap items-center gap-3">
         <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-xs font-medium">
-          {uploading ? "Uploading…" : "Upload images"}
+          {uploading ? `Uploading… ${progress}%` : "Upload images"}
           <input
             type="file"
             accept="image/*"
@@ -364,9 +412,13 @@ function GalleryField({
             }}
           />
         </label>
-        <p className="text-xs text-muted-foreground">
-          You can select several photos at once. They appear on the product page gallery.
-        </p>
+        {uploading ? (
+          <UploadBar progress={progress} label={fileLabel} />
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            You can select several photos at once. They appear on the product page gallery.
+          </p>
+        )}
       </div>
       <details className="mt-2">
         <summary className="cursor-pointer text-xs text-muted-foreground">
@@ -396,11 +448,13 @@ function ImageField({
   onChange: (v: string) => void;
 }) {
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const upload = async (file: File) => {
     setUploading(true);
-    const url = await uploadImage(file);
+    const url = await uploadImage(file, setProgress);
     setUploading(false);
+    setProgress(0);
     if (!url) return;
     onChange(url);
     toast.success("Image uploaded — remember to save");
@@ -436,7 +490,7 @@ function ImageField({
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-3">
             <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-xs font-medium">
-              {uploading ? "Uploading…" : "Upload image"}
+              {uploading ? `Uploading… ${progress}%` : "Upload image"}
               <input
                 type="file"
                 accept="image/*"
@@ -449,6 +503,7 @@ function ImageField({
                 }}
               />
             </label>
+            {uploading ? <UploadBar progress={progress} /> : null}
           </div>
           <details className="mt-2">
             <summary className="cursor-pointer text-xs text-muted-foreground">
@@ -572,6 +627,7 @@ function ProductsPanel() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [openIds, setOpenIds] = useState<string[]>([]);
   const [uploadingFor, setUploadingFor] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   useEffect(() => {
     if (data) setItems(data);
@@ -635,7 +691,9 @@ function ProductsPanel() {
     const rows: Array<Record<string, unknown>> = [];
     let i = 0;
     for (const file of files) {
-      const url = await uploadImage(file);
+      const url = await uploadImage(file, (pct) =>
+        setUploadProgress(Math.round(((i + pct / 100) / files.length) * 100)),
+      );
       if (!url) continue;
       i += 1;
       rows.push({
@@ -718,7 +776,7 @@ function ProductsPanel() {
 
             <div className="flex flex-wrap gap-3">
               <label className={`${btn} cursor-pointer ${uploadingFor === c.id ? "opacity-60" : ""}`}>
-                {uploadingFor === c.id ? "Uploading…" : `Add photos to ${c.name}`}
+                {uploadingFor === c.id ? `Uploading… ${uploadProgress}%` : `Add photos to ${c.name}`}
                 <input
                   type="file"
                   accept="image/*"
@@ -732,9 +790,16 @@ function ProductsPanel() {
                     setUploadingFor(c.id);
                     await createFromImages(c, files);
                     setUploadingFor(null);
+                    setUploadProgress(0);
                   }}
                 />
               </label>
+              {uploadingFor === c.id ? (
+                <UploadBar
+                  progress={uploadProgress}
+                  label={`Adding photos to ${c.name}`}
+                />
+              ) : null}
               <button
                 type="button"
                 className="rounded-full border border-border bg-background px-5 py-2.5 text-sm"
