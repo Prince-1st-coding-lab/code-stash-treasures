@@ -448,11 +448,13 @@ function ImageField({
   onChange: (v: string) => void;
 }) {
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const upload = async (file: File) => {
     setUploading(true);
-    const url = await uploadImage(file);
+    const url = await uploadImage(file, setProgress);
     setUploading(false);
+    setProgress(0);
     if (!url) return;
     onChange(url);
     toast.success("Image uploaded — remember to save");
@@ -488,7 +490,7 @@ function ImageField({
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-3">
             <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-xs font-medium">
-              {uploading ? "Uploading…" : "Upload image"}
+              {uploading ? `Uploading… ${progress}%` : "Upload image"}
               <input
                 type="file"
                 accept="image/*"
