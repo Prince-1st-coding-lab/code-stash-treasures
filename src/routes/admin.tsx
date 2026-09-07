@@ -790,9 +790,16 @@ function ProductsPanel() {
                     setUploadingFor(c.id);
                     await createFromImages(c, files);
                     setUploadingFor(null);
+                    setUploadProgress(0);
                   }}
                 />
               </label>
+              {uploadingFor === c.id ? (
+                <UploadBar
+                  progress={uploadProgress}
+                  label={`Adding photos to ${c.name}`}
+                />
+              ) : null}
               <button
                 type="button"
                 className="rounded-full border border-border bg-background px-5 py-2.5 text-sm"
