@@ -79,11 +79,11 @@ function ProductPage() {
         placement: c.placement,
         available: c.available,
         slug: c.slug,
-        images: [c.image_url, ...(c.gallery ?? [])].filter(Boolean),
+        images: sortImagesByDate([c.image_url, ...(c.gallery ?? [])].filter(Boolean)),
         category: product.name,
       }));
     }
-    const gallery = [product.image_url, ...(product.gallery ?? [])].filter(Boolean);
+    const gallery = sortImagesByDate([product.image_url, ...(product.gallery ?? [])].filter(Boolean));
     return gallery.map((src, i) => ({
       name: gallery.length > 1 ? `${product.name} ${i + 1}` : product.name,
       price: product.price,

@@ -35,9 +35,10 @@ export function ProductQuickView({
 }) {
   const [active, setActive] = useState(0);
   const [zoom, setZoom] = useState<number | null>(null);
-  const count = item?.images.length ?? 0;
+  const images = useMemo(() => sortImagesByDate(item?.images ?? []), [item?.images]);
+  const count = images.length;
 
-  useEffect(() => setActive(0), [item?.name, item?.images[0]]);
+  useEffect(() => setActive(0), [item?.name, images[0]]);
 
   const next = useCallback(() => setActive((i) => (count ? (i + 1) % count : 0)), [count]);
   const prev = useCallback(

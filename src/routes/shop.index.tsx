@@ -131,7 +131,7 @@ function ShopPage() {
                       placement: p.placement,
                       available: p.available,
                       slug: p.slug,
-                      images: [p.image_url, ...(p.gallery ?? [])].filter(Boolean),
+                      images: sortImagesByDate([p.image_url, ...(p.gallery ?? [])].filter(Boolean)),
                       category: p.name,
                     })
                   }
