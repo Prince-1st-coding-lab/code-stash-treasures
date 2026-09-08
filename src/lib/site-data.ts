@@ -105,7 +105,7 @@ export const productQuery = (slug: string) =>
     },
   });
 
-function uploadTimestamp(url: string): number | null {
+export function uploadTimestamp(url: string): number | null {
   const match = url.match(/\/uploads\/(\d+)-/);
   const ts = match ? Number(match[1]) : null;
   return ts && Number.isFinite(ts) ? ts : null;
