@@ -104,3 +104,20 @@ export const productQuery = (slug: string) =>
       return data;
     },
   });
+
+function uploadTimestamp(url: string): number | null {
+  const match = url.match(/\/uploads\/(\d+)-/);
+  const ts = match ? Number(match[1]) : null;
+  return ts && Number.isFinite(ts) ? ts : null;
+}
+
+export function sortImagesByDate(urls: string[]): string[] {
+  return [...urls].sort((a, b) => {
+    const ta = uploadTimestamp(a);
+    const tb = uploadTimestamp(b);
+    if (ta && tb) return tb - ta;
+    if (ta) return -1;
+    if (tb) return 1;
+    return 0;
+  });
+}

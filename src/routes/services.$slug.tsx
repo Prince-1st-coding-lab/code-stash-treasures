@@ -8,7 +8,7 @@ import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { ContactMenu } from "@/components/site/ContactMenu";
 import { ImageLightbox, useLightbox } from "@/components/site/ImageLightbox";
-import { servicesQuery, settingsQuery, type Service } from "@/lib/site-data";
+import { servicesQuery, settingsQuery, sortImagesByDate, type Service } from "@/lib/site-data";
 
 const serviceQuery = (slug: string) =>
   queryOptions({
@@ -89,9 +89,9 @@ function ServicePage() {
   const { data: services } = useSuspenseQuery(servicesQuery);
 
   const gallery = service
-    ? service.gallery?.length
-      ? service.gallery
-      : [service.image_url]
+    ? sortImagesByDate(
+        service.gallery?.length ? service.gallery : [service.image_url],
+      )
     : [];
   const lightbox = useLightbox(gallery.length);
 

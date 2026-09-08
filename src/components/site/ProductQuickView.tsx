@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { X, ChevronLeft, ChevronRight, MessageCircle, ExternalLink } from "lucide-react";
 
-import { whatsappLink } from "@/lib/site-data";
+import { sortImagesByDate, whatsappLink } from "@/lib/site-data";
 import { ImageLightbox } from "@/components/site/ImageLightbox";
 
 export type QuickViewItem = {
@@ -35,9 +35,10 @@ export function ProductQuickView({
 }) {
   const [active, setActive] = useState(0);
   const [zoom, setZoom] = useState<number | null>(null);
-  const count = item?.images.length ?? 0;
+  const images = useMemo(() => sortImagesByDate(item?.images ?? []), [item?.images]);
+  const count = images.length;
 
-  useEffect(() => setActive(0), [item?.name, item?.images[0]]);
+  useEffect(() => setActive(0), [item?.name, images[0]]);
 
   const next = useCallback(() => setActive((i) => (count ? (i + 1) % count : 0)), [count]);
   const prev = useCallback(
@@ -106,7 +107,7 @@ export function ProductQuickView({
               className="block w-full cursor-zoom-in"
             >
               <img
-                src={item.images[active]}
+                src={images[active]}
                 alt={`${item.name} photo ${active + 1}`}
                 className="h-64 w-full object-cover sm:h-96"
               />
@@ -135,7 +136,7 @@ export function ProductQuickView({
 
           {count > 1 ? (
             <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-              {item.images.map((src, i) => (
+              {images.map((src, i) => (
                 <button
                   key={`${src}-${i}`}
                   type="button"
@@ -228,7 +229,7 @@ export function ProductQuickView({
 
       <div onClick={(e) => e.stopPropagation()}>
         <ImageLightbox
-          images={item.images}
+          images={images}
           index={zoom}
           alt={item.name}
           onClose={() => setZoom(null)}
