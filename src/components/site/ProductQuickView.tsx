@@ -107,7 +107,7 @@ export function ProductQuickView({
               className="block w-full cursor-zoom-in"
             >
               <img
-                src={item.images[active]}
+                src={images[active]}
                 alt={`${item.name} photo ${active + 1}`}
                 className="h-64 w-full object-cover sm:h-96"
               />
@@ -136,7 +136,7 @@ export function ProductQuickView({
 
           {count > 1 ? (
             <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-              {item.images.map((src, i) => (
+              {images.map((src, i) => (
                 <button
                   key={`${src}-${i}`}
                   type="button"
@@ -229,7 +229,7 @@ export function ProductQuickView({
 
       <div onClick={(e) => e.stopPropagation()}>
         <ImageLightbox
-          images={item.images}
+          images={images}
           index={zoom}
           alt={item.name}
           onClose={() => setZoom(null)}
