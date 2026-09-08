@@ -11,6 +11,7 @@ import {
   productsQuery,
   servicesQuery,
   settingsQuery,
+  sortImagesByDate,
   whatsappLink,
 } from "@/lib/site-data";
 

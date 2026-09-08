@@ -7,7 +7,7 @@ import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { ContactMenu } from "@/components/site/ContactMenu";
 import { ProductQuickView, type QuickViewItem } from "@/components/site/ProductQuickView";
-import { productsQuery, servicesQuery, settingsQuery, whatsappLink } from "@/lib/site-data";
+import { productsQuery, servicesQuery, settingsQuery, sortImagesByDate, whatsappLink } from "@/lib/site-data";
 
 
 export const Route = createFileRoute("/shop/")({

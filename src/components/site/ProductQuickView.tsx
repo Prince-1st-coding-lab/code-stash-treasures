@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { X, ChevronLeft, ChevronRight, MessageCircle, ExternalLink } from "lucide-react";
 
-import { whatsappLink } from "@/lib/site-data";
+import { sortImagesByDate, whatsappLink } from "@/lib/site-data";
 import { ImageLightbox } from "@/components/site/ImageLightbox";
 
 export type QuickViewItem = {
