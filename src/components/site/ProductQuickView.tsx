@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { X, ChevronLeft, ChevronRight, MessageCircle, ExternalLink } from "lucide-react";
 
