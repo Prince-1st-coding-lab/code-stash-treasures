@@ -12,6 +12,7 @@ import {
   servicesQuery,
   settingsQuery,
   sortImagesByDate,
+  uploadTimestamp,
   whatsappLink,
 } from "@/lib/site-data";
 
@@ -68,7 +69,13 @@ function ProductPage() {
 
   const items = useMemo<QuickViewItem[]>(() => {
     if (!product) return [];
-    const children = products.filter((p) => p.parent_id === product.id);
+    const children = products
+      .filter((p) => p.parent_id === product.id)
+      .sort((a, b) => {
+        const aTime = uploadTimestamp(a.image_url) ?? Date.parse(a.created_at);
+        const bTime = uploadTimestamp(b.image_url) ?? Date.parse(b.created_at);
+        return bTime - aTime;
+      });
     if (children.length) {
       return children.map((c) => ({
         name: c.name,
